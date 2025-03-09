@@ -1,34 +1,95 @@
+// import express from "express";
+// import dotenv from "dotenv"
+// import mongoose from "mongoose";
+// import usersRoute from "./api/routes/users.js";
+// import roomsRoute from "./api/routes/rooms.js";
+// import hotelsRoute from "./api/routes/hotels.js";
+// import authRoute from "./api/routes/auth.js";
+//
+// const app = express()
+// dotenv.config()
+//
+// const connect = async () => {
+//     try {
+//         await mongoose.connect(process.env.MONGO);
+//         console.log("Connected to mongoDB");
+//     }catch (error){
+//         throw error;
+//     }
+// };
+//
+// mongoose.connection.on("Disconnect", ()=>{
+//     console.log("mongoDB disconnected!");
+// })
+// mongoose.connection.on("connect", ()=>{
+//     console.log("mongoDB connected!");
+// })
+//
+// // app.get("/", (req,res) =>{
+// //     res.send("Hello first req")
+// // })
+//
+// app.use("/api/auth", authRoute);
+// app.use("/api/users", usersRoute);
+// app.use("/api/hotels", hotelsRoute);
+// app.use("/api/rooms", roomsRoute);
+//
+//
+// app.listen(8800, () => {
+//     connect()
+//     console.log("Connected to backend.");
+//   });
+
+
 import express from "express";
-import dotenv from "dotenv"
+import dotenv from "dotenv";
 import mongoose from "mongoose";
-import auth from "./api/routes/auth.js";
+import usersRoute from "./api/routes/users.js";
+import roomsRoute from "./api/routes/rooms.js";
+import hotelsRoute from "./api/routes/hotels.js";
+import authRoute from "./api/routes/auth.js";
 
-const app = express()
-dotenv.config()
+// Load environment variables
+dotenv.config();
 
+const app = express();
+
+// MongoDB Connection Function
 const connect = async () => {
     try {
-        await mongoose.connect(process.env.MONGO);
-        console.log("Connected to mongoDB");
-    }catch (error){
-        throw error;
+        if (!process.env.MONGO_URI) {
+            throw new Error("MongoDB URI is not defined in .env file");
+        }
+        await mongoose.connect(process.env.MONGO_URI, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+        });
+        console.log("Connected to MongoDB");
+    } catch (error) {
+        console.error("MongoDB connection error:", error);
     }
 };
 
-mongoose.connection.on("Disconnect", ()=>{
-    console.log("mongoDB disconnected!");
-})
-mongoose.connection.on("connect", ()=>{
-    console.log("mongoDB connected!");
-})
+// MongoDB Connection Listeners
+mongoose.connection.on("disconnected", () => {
+    console.log("MongoDB disconnected!");
+});
+mongoose.connection.on("connected", () => {
+    console.log("MongoDB connected!");
+});
 
-// app.get("/", (req,res) =>{
-//     res.send("Hello first req")
-// })
+// Middleware
+app.use(express.json()); // Parses incoming JSON requests
 
-app.use("/auth" , auth)
+// Routes
+app.use("/api/auth", authRoute);
+app.use("/api/users", usersRoute);
+app.use("/api/hotels", hotelsRoute);
+app.use("/api/rooms", roomsRoute);
 
-app.listen(8800, () => {
-    connect()
-    console.log("Connected to backend.");
-  });
+// Start Server
+const PORT = process.env.PORT || 8800;
+app.listen(PORT, () => {
+    connect();
+    console.log(`Server is running on port ${PORT}`);
+});
