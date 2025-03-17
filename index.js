@@ -79,13 +79,17 @@ mongoose.connection.on("connected", () => {
 });
 
 // Middleware
-app.use(express.json()); // Parses incoming JSON requests
+app.use(express.json());
 
 // Routes
 app.use("/api/auth", authRoute);
 app.use("/api/users", usersRoute);
 app.use("/api/hotels", hotelsRoute);
 app.use("/api/rooms", roomsRoute);
+
+app.use((req,res,next)=>{
+    console.log("Hi I'm a Middleware!")
+})
 
 // Start Server
 const PORT = process.env.PORT || 8800;
